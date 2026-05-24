@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Galeria{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">
+    <i class="ph ph-sparkle"></i>
+    Galeria de Minerais
+    {% if minerals %}
+      <span class="count-badge">{{ minerals|length }}</span>
+    {% endif %}
+  </h1>
+  <a href="{{ url_for('add_form') }}" class="btn btn-outline">
+    <i class="ph ph-plus-circle"></i> Novo Mineral
+  </a>
+</div>
+
+{% if not minerals %}
+  <div class="empty-state">
+    <i class="ph ph-gem"></i>
+    <h2>Nenhum mineral ainda</h2>
+    <p>Comece sua coleção adicionando o primeiro mineral pelo nome ou enviando uma foto.</p>
+    <a href="{{ url_for('add_form') }}" class="btn btn-primary btn-lg" style="margin-top:0.5rem">
+      <i class="ph ph-plus"></i> Adicionar Primeiro Mineral
+    </a>
+  </div>
+
+{% else %}
+  <div class="mineral-grid">
+    {% for m in minerals %}
+    <div class="mineral-card" id="card-{{ m._id }}">
+
+      {% if m.image_path %}
+        <img class="card-image" src="{{ url_for('static', filename=m.image_path) }}" alt="{{ m.name }}">
+      {% else %}
+        <div class="card-placeholder">
+          <i class="ph ph-gem"></i>
+        </div>
+      {% endif %}
+
+      <div class="card-body">
+        <h3 class="card-title">{{ m.name }}</h3>
+        <div class="card-badges">
+          {% if m.chemical_formula %}
+            <span class="badge badge-formula">{{ m.chemical_formula }}</span>
+          {% endif %}
+          {% if m.hardness %}
+            <span class="badge badge-hardness">
+              <i class="ph ph-scales" style="font-size:0.7rem"></i>
+              {{ m.hardness }} Mohs
+            </span>
+          {% endif %}
+          {% if m.crystal_system %}
+            <span class="badge badge-crystal">{{ m.crystal_system }}</span>
+          {% endif %}
+        </div>
+        {% if m.main_use %}
+          <p style="font-size:0.82rem; color:var(--text-muted); margin-top:0.3rem;">{{ m.main_use[:80] }}{% if m.main_use|length > 80 %}…{% endif %}</p>
+        {% endif %}
+      </div>
+
+      <div class="card-footer">
+        <a href="{{ url_for('mineral_detail', mineral_id=m._id) }}" class="btn btn-outline btn-sm" style="flex:1; justify-content:center">
+          <i class="ph ph-eye"></i> Ver detalhes
+        </a>
+        <a href="{{ url_for('edit_form', mineral_id=m._id) }}" class="btn btn-ghost btn-sm" title="Editar">
+          <i class="ph ph-pencil"></i>
+        </a>
+        <button
+          class="btn btn-danger btn-sm"
+          data-action="delete"
+          data-id="{{ m._id }}"
+          data-name="{{ m.name }}"
+          title="Excluir"
+        >
+          <i class="ph ph-trash"></i>
+        </button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}

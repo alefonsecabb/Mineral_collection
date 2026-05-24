@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}{{ mineral.name }}{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+  <a href="{{ url_for('gallery') }}"><i class="ph ph-house"></i> Galeria</a>
+  <i class="ph ph-caret-right"></i>
+  <span>{{ mineral.name }}</span>
+</div>
+
+<div class="detail-grid">
+
+  <!-- Imagem -->
+  <div class="detail-image-wrap">
+    {% if mineral.image_path %}
+      <img class="detail-image" src="{{ url_for('static', filename=mineral.image_path) }}" alt="{{ mineral.name }}">
+    {% else %}
+      <div class="detail-placeholder">
+        <i class="ph ph-gem"></i>
+      </div>
+    {% endif %}
+
+    {% if mineral.created_at %}
+      <p class="timestamp">
+        <i class="ph ph-calendar"></i>
+        Adicionado em {{ mineral.created_at | format_date }}
+      </p>
+    {% endif %}
+  </div>
+
+  <!-- Dados -->
+  <div class="detail-content">
+    <h1 class="detail-name">{{ mineral.name }}</h1>
+
+    <!-- Data grid -->
+    <div class="data-grid">
+      {% if mineral.chemical_formula %}
+      <div class="data-item">
+        <div class="data-label"><i class="ph ph-atom"></i> Fórmula</div>
+        <div class="data-value formula">{{ mineral.chemical_formula }}</div>
+      </div>
+      {% endif %}
+
+      {% if mineral.hardness %}
+      <div class="data-item">
+        <div class="data-label"><i class="ph ph-scales"></i> Dureza Mohs</div>
+        <div class="data-value">{{ mineral.hardness }}</div>
+        <div class="mohs-bar" data-hardness="{{ mineral.hardness }}"></div>
+      </div>
+      {% endif %}
+
+      {% if mineral.crystal_system %}
+      <div class="data-item">
+        <div class="data-label"><i class="ph ph-cube"></i> Sistema Cristalino</div>
+        <div class="data-value">{{ mineral.crystal_system }}</div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Descrição -->
+    {% if mineral.description %}
+    <div class="section-block">
+      <div class="section-title"><i class="ph ph-book-open"></i> Descrição</div>
+      <p>{{ mineral.description }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Curiosidade -->
+    {% if mineral.curiosity %}
+    <div class="section-block">
+      <div class="section-title"><i class="ph ph-lightbulb"></i> Curiosidade</div>
+      <p class="curiosity-text">{{ mineral.curiosity }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Uso Principal -->
+    {% if mineral.main_use %}
+    <div class="section-block">
+      <div class="section-title"><i class="ph ph-factory"></i> Uso Principal</div>
+      <p>{{ mineral.main_use }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Ações -->
+    <div class="detail-actions">
+      <a href="{{ url_for('gallery') }}" class="btn btn-ghost">
+        <i class="ph ph-arrow-left"></i> Voltar
+      </a>
+      <a href="{{ url_for('edit_form', mineral_id=mineral._id) }}" class="btn btn-outline">
+        <i class="ph ph-pencil"></i> Editar
+      </a>
+      <button
+        class="btn btn-danger"
+        data-action="delete"
+        data-id="{{ mineral._id }}"
+        data-name="{{ mineral.name }}"
+      >
+        <i class="ph ph-trash"></i> Excluir
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Editar — {{ mineral.name }}{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+  <a href="{{ url_for('gallery') }}"><i class="ph ph-house"></i> Galeria</a>
+  <i class="ph ph-caret-right"></i>
+  <a href="{{ url_for('mineral_detail', mineral_id=mineral._id) }}">{{ mineral.name }}</a>
+  <i class="ph ph-caret-right"></i>
+  <span>Editar</span>
+</div>
+
+<div class="form-card" style="max-width:720px">
+  <h2><i class="ph ph-pencil-simple"></i> Editar — {{ mineral.name }}</h2>
+
+  <form
+    method="POST"
+    action="{{ url_for('edit_mineral', mineral_id=mineral._id) }}"
+    enctype="multipart/form-data"
+    id="edit-form"
+  >
+
+    <div class="form-group">
+      <label class="form-label">Nome</label>
+      <input type="text" name="name" class="form-input" value="{{ mineral.name }}" required>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Fórmula Química</label>
+        <input type="text" name="chemical_formula" class="form-input"
+          value="{{ mineral.chemical_formula or '' }}"
+          placeholder="Ex: SiO₂">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Dureza (Mohs)</label>
+        <input type="number" name="hardness" class="form-input"
+          value="{{ mineral.hardness or '' }}"
+          min="1" max="10" step="0.5" placeholder="1.0 – 10.0">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Sistema Cristalino</label>
+      <input type="text" name="crystal_system" class="form-input"
+        value="{{ mineral.crystal_system or '' }}"
+        placeholder="Ex: Trigonal, Cúbico, Monoclínico">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Descrição</label>
+      <textarea name="description" class="form-textarea" rows="6">{{ mineral.description or '' }}</textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Curiosidade</label>
+      <textarea name="curiosity" class="form-textarea" rows="3">{{ mineral.curiosity or '' }}</textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Uso Principal</label>
+      <textarea name="main_use" class="form-textarea" rows="2">{{ mineral.main_use or '' }}</textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label"><i class="ph ph-image"></i> Substituir Foto (opcional)</label>
+      {% if mineral.image_path %}
+        <img src="{{ url_for('static', filename=mineral.image_path) }}"
+             style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-bottom:0.75rem;border:1px solid var(--border)">
+      {% endif %}
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" name="photo" accept="image/*" id="photo-input">
+        <i class="ph ph-upload-simple"></i>
+        <p><strong>Clique</strong> para selecionar nova foto</p>
+      </div>
+      <div class="image-preview" id="image-preview">
+        <img id="preview-img" src="" alt="Preview">
+      </div>
+    </div>
+
+    <div style="display:flex; gap:0.75rem; margin-top:0.5rem">
+      <a href="{{ url_for('mineral_detail', mineral_id=mineral._id) }}" class="btn btn-ghost btn-lg">
+        <i class="ph ph-x"></i> Cancelar
+      </a>
+      <button type="submit" class="btn btn-primary btn-lg" id="submit-btn" style="flex:1; justify-content:center">
+        <i class="ph ph-floppy-disk"></i>
+        <span id="submit-text">Salvar Alterações</span>
+        <span id="submit-spinner" class="spinner" style="display:none"></span>
+      </button>
+    </div>
+
+  </form>
+</div>
+{% endblock %}

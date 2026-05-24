@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Adicionar Mineral{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+  <a href="{{ url_for('gallery') }}"><i class="ph ph-house"></i> Galeria</a>
+  <i class="ph ph-caret-right"></i>
+  <span>Adicionar Mineral</span>
+</div>
+
+<div class="form-card">
+  <h2><i class="ph ph-plus-circle"></i> Adicionar Mineral</h2>
+
+  <div class="ai-notice">
+    <i class="ph ph-robot"></i>
+    <span>
+      {% if has_api_key %}
+        Modo IA ativo — as informações serão geradas automaticamente pelo Claude.
+      {% else %}
+        Modo offline — buscando em banco local de minerais.
+        Para ativar a IA, adicione sua <strong>ANTHROPIC_API_KEY</strong> no arquivo <code>.env</code>.
+      {% endif %}
+    </span>
+  </div>
+
+  <form method="POST" action="{{ url_for('add_mineral') }}" enctype="multipart/form-data" id="add-form">
+
+    <div class="form-group">
+      <label class="form-label" for="name">
+        <i class="ph ph-text-t"></i> Nome do Mineral
+      </label>
+      <input
+        type="text"
+        id="name"
+        name="name"
+        class="form-input"
+        placeholder="Ex: Ametista, Quartzo, Pirita, Turmalina..."
+        autocomplete="off"
+      >
+    </div>
+
+    <div class="or-divider">ou</div>
+
+    <div class="form-group">
+      <label class="form-label">
+        <i class="ph ph-image"></i> Foto do Mineral
+      </label>
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" name="photo" accept="image/*" id="photo-input">
+        <i class="ph ph-upload-simple"></i>
+        <p><strong>Clique para selecionar</strong> ou arraste a foto aqui</p>
+        <p style="font-size:0.78rem; margin-top:0.25rem">PNG, JPG, WEBP — máx. 16 MB</p>
+      </div>
+      <div class="image-preview" id="image-preview">
+        <img id="preview-img" src="" alt="Preview">
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-lg" id="submit-btn" style="width:100%; justify-content:center; margin-top:0.5rem">
+      <i class="ph ph-sparkle"></i>
+      <span id="submit-text">Analisar e Adicionar</span>
+      <span id="submit-spinner" class="spinner" style="display:none"></span>
+    </button>
+
+  </form>
+</div>
+{% endblock %}

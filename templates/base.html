@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Coleção de Minerais{% endblock %} — Pedro Faria da Fonseca</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1/src/index.js" defer></script>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="{{ url_for('gallery') }}" class="navbar-brand">
+    <i class="ph ph-diamonds-four"></i>
+    <span>Coleção de Pedro Faria da Fonseca</span>
+  </a>
+  <a href="{{ url_for('add_form') }}" class="btn btn-primary btn-sm">
+    <i class="ph ph-plus"></i> Adicionar Mineral
+  </a>
+</nav>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="flash-area">
+      {% for msg in messages %}
+        <div class="flash-message">
+          <i class="ph ph-warning"></i> {{ msg }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<main class="main-content">
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+  <i class="ph ph-gem"></i>
+  <span>Coleção Pessoal de Minerais &mdash; Pedro Faria da Fonseca</span>
+</footer>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
