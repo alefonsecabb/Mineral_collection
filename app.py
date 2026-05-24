@@ -1,5 +1,9 @@
 import os
 import uuid
+import ssl
+import urllib.request
+import urllib.parse
+import json
 from datetime import datetime, timezone
 
 from dotenv import load_dotenv
@@ -37,6 +41,13 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def _ssl_ctx():
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    return ctx
+
+
 def save_uploaded_file(file_obj):
     if not file_obj or file_obj.filename == "":
         return None
@@ -47,6 +58,22 @@ def save_uploaded_file(file_obj):
     safe_name = secure_filename(filename)
     file_obj.save(os.path.join(UPLOAD_FOLDER, safe_name))
     return f"uploads/{safe_name}"
+
+
+def download_image_from_url(image_url):
+    try:
+        req = urllib.request.Request(image_url, headers={"User-Agent": "MineralCollection/1.0"})
+        with urllib.request.urlopen(req, context=_ssl_ctx(), timeout=10) as resp:
+            content_type = resp.headers.get("Content-Type", "image/jpeg")
+            ext_map = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "jpg"}
+            ext = ext_map.get(content_type.split(";")[0].strip(), "jpg")
+            filename = f"{uuid.uuid4().hex}.{ext}"
+            dest = os.path.join(UPLOAD_FOLDER, filename)
+            with open(dest, "wb") as f:
+                f.write(resp.read())
+            return f"uploads/{filename}"
+    except Exception:
+        return None
 
 
 @app.route("/")
@@ -61,16 +88,68 @@ def add_form():
     return render_template("add.html", has_api_key=has_api_key)
 
 
+@app.route("/buscar-imagem")
+def buscar_imagem():
+    q = request.args.get("q", "").strip()
+    if not q:
+        return jsonify([])
+    try:
+        query = urllib.parse.quote(q + " mineral")
+        search_url = (
+            "https://commons.wikimedia.org/w/api.php"
+            f"?action=query&list=search&srsearch={query}"
+            "&srnamespace=6&format=json&srlimit=12"
+        )
+        req = urllib.request.Request(search_url, headers={"User-Agent": "MineralCollection/1.0"})
+        with urllib.request.urlopen(req, context=_ssl_ctx(), timeout=10) as r:
+            data = json.load(r)
+
+        titles = [item["title"] for item in data.get("query", {}).get("search", [])]
+        if not titles:
+            return jsonify([])
+
+        titles_param = urllib.parse.quote("|".join(titles[:10]))
+        thumb_url = (
+            "https://commons.wikimedia.org/w/api.php"
+            f"?action=query&titles={titles_param}"
+            "&prop=imageinfo&iiprop=url|thumburl&iiurlwidth=320&format=json"
+        )
+        req2 = urllib.request.Request(thumb_url, headers={"User-Agent": "MineralCollection/1.0"})
+        with urllib.request.urlopen(req2, context=_ssl_ctx(), timeout=10) as r:
+            thumb_data = json.load(r)
+
+        results = []
+        for page in thumb_data.get("query", {}).get("pages", {}).values():
+            if "imageinfo" in page:
+                info = page["imageinfo"][0]
+                thumb = info.get("thumburl", "")
+                url = info.get("url", "")
+                if thumb and url:
+                    results.append({
+                        "title": page["title"].replace("File:", ""),
+                        "thumb": thumb,
+                        "url": url,
+                    })
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/adicionar", methods=["POST"])
 def add_mineral():
     name = request.form.get("name", "").strip()
     photo = request.files.get("photo")
+    image_url = request.form.get("image_url", "").strip()
 
-    if not name and (not photo or photo.filename == ""):
-        flash("Informe o nome do mineral ou envie uma foto.")
+    if not name and (not photo or photo.filename == "") and not image_url:
+        flash("Informe o nome do mineral, envie uma foto ou selecione uma imagem da internet.")
         return redirect(url_for("add_form"))
 
+    # Resolve image: uploaded file takes priority, then web URL
     image_path = save_uploaded_file(photo)
+    if not image_path and image_url:
+        image_path = download_image_from_url(image_url)
+
     full_image_path = os.path.join(UPLOAD_FOLDER, os.path.basename(image_path)) if image_path else None
 
     try:
@@ -126,16 +205,21 @@ def edit_mineral(mineral_id):
         return redirect(url_for("gallery"))
 
     photo = request.files.get("photo")
+    image_url = request.form.get("image_url", "").strip()
     image_path = mineral.get("image_path")
 
+    new_path = None
     if photo and photo.filename != "":
         new_path = save_uploaded_file(photo)
-        if new_path:
-            if image_path:
-                old_full = os.path.join(app.root_path, "static", image_path)
-                if os.path.exists(old_full):
-                    os.remove(old_full)
-            image_path = new_path
+    elif image_url:
+        new_path = download_image_from_url(image_url)
+
+    if new_path:
+        if image_path:
+            old_full = os.path.join(app.root_path, "static", image_path)
+            if os.path.exists(old_full):
+                os.remove(old_full)
+        image_path = new_path
 
     updates = {
         "name": request.form.get("name", mineral["name"]).strip(),

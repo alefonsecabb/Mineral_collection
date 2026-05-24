@@ -19,6 +19,7 @@
     enctype="multipart/form-data"
     id="edit-form"
   >
+    <input type="hidden" name="image_url" id="image_url_input">
 
     <div class="form-group">
       <label class="form-label">Nome</label>
@@ -68,13 +69,48 @@
         <img src="{{ url_for('static', filename=mineral.image_path) }}"
              style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-bottom:0.75rem;border:1px solid var(--border)">
       {% endif %}
-      <div class="upload-zone" id="upload-zone">
-        <input type="file" name="photo" accept="image/*" id="photo-input">
-        <i class="ph ph-upload-simple"></i>
-        <p><strong>Clique</strong> para selecionar nova foto</p>
+
+      <div class="img-tabs">
+        <button type="button" class="img-tab active" data-tab="upload">
+          <i class="ph ph-upload-simple"></i> Do meu computador
+        </button>
+        <button type="button" class="img-tab" data-tab="search">
+          <i class="ph ph-magnifying-glass"></i> Buscar na internet
+        </button>
       </div>
-      <div class="image-preview" id="image-preview">
-        <img id="preview-img" src="" alt="Preview">
+
+      <div class="img-tab-panel" id="tab-upload">
+        <div class="upload-zone" id="upload-zone">
+          <input type="file" name="photo" accept="image/*" id="photo-input">
+          <i class="ph ph-upload-simple"></i>
+          <p><strong>Clique</strong> para selecionar nova foto</p>
+        </div>
+        <div class="image-preview" id="image-preview">
+          <img id="preview-img" src="" alt="Preview">
+        </div>
+      </div>
+
+      <div class="img-tab-panel" id="tab-search" style="display:none">
+        <div class="search-bar">
+          <input
+            type="text"
+            id="img-search-input"
+            class="form-input"
+            placeholder="Ex: Ametista, Pirita..."
+            value="{{ mineral.name }}"
+          >
+          <button type="button" class="btn btn-outline" id="img-search-btn">
+            <i class="ph ph-magnifying-glass"></i> Buscar
+          </button>
+        </div>
+        <div id="img-search-status" class="search-status" style="display:none"></div>
+        <div id="img-search-results" class="img-results-grid"></div>
+        <div id="img-selected-preview" class="selected-img-preview" style="display:none">
+          <img id="selected-img" src="" alt="Selecionada">
+          <button type="button" class="btn btn-ghost btn-sm clear-img-btn" id="clear-img-btn">
+            <i class="ph ph-x"></i> Remover seleção
+          </button>
+        </div>
       </div>
     </div>
 

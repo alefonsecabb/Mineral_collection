@@ -24,6 +24,7 @@
   </div>
 
   <form method="POST" action="{{ url_for('add_mineral') }}" enctype="multipart/form-data" id="add-form">
+    <input type="hidden" name="image_url" id="image_url_input">
 
     <div class="form-group">
       <label class="form-label" for="name">
@@ -39,12 +40,20 @@
       >
     </div>
 
-    <div class="or-divider">ou</div>
+    <div class="or-divider">foto (opcional)</div>
 
-    <div class="form-group">
-      <label class="form-label">
-        <i class="ph ph-image"></i> Foto do Mineral
-      </label>
+    <!-- Image tabs -->
+    <div class="img-tabs">
+      <button type="button" class="img-tab active" data-tab="upload">
+        <i class="ph ph-upload-simple"></i> Do meu computador
+      </button>
+      <button type="button" class="img-tab" data-tab="search">
+        <i class="ph ph-magnifying-glass"></i> Buscar na internet
+      </button>
+    </div>
+
+    <!-- Tab: upload -->
+    <div class="img-tab-panel" id="tab-upload">
       <div class="upload-zone" id="upload-zone">
         <input type="file" name="photo" accept="image/*" id="photo-input">
         <i class="ph ph-upload-simple"></i>
@@ -56,7 +65,30 @@
       </div>
     </div>
 
-    <button type="submit" class="btn btn-primary btn-lg" id="submit-btn" style="width:100%; justify-content:center; margin-top:0.5rem">
+    <!-- Tab: buscar online -->
+    <div class="img-tab-panel" id="tab-search" style="display:none">
+      <div class="search-bar">
+        <input
+          type="text"
+          id="img-search-input"
+          class="form-input"
+          placeholder="Ex: Ametista, Pirita, Turmalina..."
+        >
+        <button type="button" class="btn btn-outline" id="img-search-btn">
+          <i class="ph ph-magnifying-glass"></i> Buscar
+        </button>
+      </div>
+      <div id="img-search-status" class="search-status" style="display:none"></div>
+      <div id="img-search-results" class="img-results-grid"></div>
+      <div id="img-selected-preview" class="selected-img-preview" style="display:none">
+        <img id="selected-img" src="" alt="Selecionada">
+        <button type="button" class="btn btn-ghost btn-sm clear-img-btn" id="clear-img-btn">
+          <i class="ph ph-x"></i> Remover seleção
+        </button>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-lg" id="submit-btn" style="width:100%; justify-content:center; margin-top:1.25rem">
       <i class="ph ph-sparkle"></i>
       <span id="submit-text">Analisar e Adicionar</span>
       <span id="submit-spinner" class="spinner" style="display:none"></span>
